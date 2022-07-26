@@ -10,8 +10,8 @@ locals {
 # Public IP for VPN Gateway (branch)
 resource "azurerm_public_ip" "vnet-branch-vpngw-publicip" {
   name                = "vnet-branch-vpngw-publicip"
-  location            = var.lab-location
-  resource_group_name = var.lab-rg
+  location            = var.resource_location
+  resource_group_name = "${var.app_name}-RG"
 
   allocation_method = "Dynamic"
   tags              = var.tags
@@ -20,22 +20,22 @@ resource "azurerm_public_ip" "vnet-branch-vpngw-publicip" {
 # Branch VNet
 resource "azurerm_virtual_network" "vnet-branch-1" {
   address_space       = ["10.252.252.0/22"]
-  location            = var.lab-location
+  location            = var.resource_location
   name                = "vnet-branch-1"
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   tags                = var.tags
 }
 
 resource "azurerm_subnet" "vnet-branch-1-subnet-1" {
   name                 = "net-branch-1-subnet-1"
-  resource_group_name  = var.lab-rg
+  resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet-branch-1.name
   address_prefixes     = ["10.252.252.0/24"]
 }
 
 resource "azurerm_subnet" "vnet-branch-1-subnet-2" {
   name                 = "net-branch-1-subnet-2"
-  resource_group_name  = var.lab-rg
+  resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet-branch-1.name
   address_prefixes     = ["10.252.253.0/24"]
 }
@@ -43,20 +43,20 @@ resource "azurerm_subnet" "vnet-branch-1-subnet-2" {
 # Gateway subnet for VPN Gateway
 resource "azurerm_subnet" "vnet-branch-1-subnet-gw" {
   name                 = "GatewaySubnet"
-  resource_group_name  = var.lab-rg
+  resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet-branch-1.name
   address_prefixes     = ["10.252.255.0/24"]
 }
 
 # VPN Gateway - we are using the small one to not generate cost. The BGP must be active
 resource "azurerm_virtual_network_gateway" "vnet-branch-1-vpngw" {
-  location            = var.lab-location
+  location            = var.resource_location
   name                = "vnet-branch-1-vpngw"
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   vpn_type            = "RouteBased"
   generation          = "Generation1"
   sku                 = "VpnGw1"
-  type                = "vpn"
+  type                = "Vpn"
   enable_bgp          = true
   active_active       = false
   bgp_settings {
@@ -73,9 +73,9 @@ resource "azurerm_virtual_network_gateway" "vnet-branch-1-vpngw" {
 resource "azurerm_local_network_gateway" "vpn-to-vwan-hub" {
   address_space       = ["${tolist(azurerm_vpn_gateway.VPNGW-HUB-WestEurope.bgp_settings[0].instance_0_bgp_peering_address[0].tunnel_ips)[0]}/32"]
   gateway_address     = tolist(azurerm_vpn_gateway.VPNGW-HUB-WestEurope.bgp_settings[0].instance_0_bgp_peering_address[0].tunnel_ips)[1]
-  location            = var.lab-location
+  location            = var.resource_location
   name                = "vpn-to-vwan-hub"
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   bgp_settings {
     asn                 = azurerm_vpn_gateway.VPNGW-HUB-WestEurope.bgp_settings[0].asn
     bgp_peering_address = tolist(azurerm_vpn_gateway.VPNGW-HUB-WestEurope.bgp_settings[0].instance_0_bgp_peering_address[0].tunnel_ips)[0]
@@ -86,8 +86,8 @@ resource "azurerm_local_network_gateway" "vpn-to-vwan-hub" {
 # VPN Connection
 resource "azurerm_virtual_network_gateway_connection" "branch-to-hub-vpn" {
   name                = "branch-to-hub-vpn"
-  location            = var.lab-location
-  resource_group_name = var.lab-rg
+  location            = var.resource_location
+  resource_group_name = "${var.app_name}-RG"
 
   type       = "IPsec"
   enable_bgp = true
@@ -106,8 +106,8 @@ resource "azurerm_virtual_network_gateway_connection" "branch-to-hub-vpn" {
 # Site definition (of branch-1)
 resource "azurerm_vpn_site" "branch-1-vpn" {
   name                = "branch-1-site"
-  location            = var.lab-location
-  resource_group_name = var.lab-rg
+  location            = var.resource_location
+  resource_group_name = "${var.app_name}-RG"
   virtual_wan_id      = azurerm_virtual_wan.vwan-demo.id
 
   link {
