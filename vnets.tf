@@ -1,51 +1,59 @@
+# Resource group for VWan
+
+resource "azurerm_resource_group" "rg" {
+  name     = "${var.app_name}-RG"
+  location = var.resource_location
+}
+
+
 # VNets configuration for vWAN Hubs
 
 # VNet definitions
 resource "azurerm_virtual_network" "vnet-shared" {
   address_space       = ["172.21.0.0/16"]
-  location            = var.lab-location
+  location            = var.resource_location
   name                = "vnet-shared"
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   tags                = var.tags
 }
 
 resource "azurerm_virtual_network" "vnet-isolated" {
   address_space       = ["172.22.0.0/16"]
-  location            = var.lab-location
+  location            = var.resource_location
   name                = "vnet-isolated"
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   tags                = var.tags
 }
 
 resource "azurerm_virtual_network" "vnet-1" {
   address_space       = ["172.17.0.0/22"]
-  location            = var.lab-location
+  location            = var.resource_location
   name                = "vnet-1"
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   tags                = var.tags
 }
 
 resource "azurerm_virtual_network" "vnet-2" {
   address_space       = ["172.17.4.0/22"]
-  location            = var.lab-location
+  location            = var.resource_location
   name                = "vnet-2"
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   tags                = var.tags
 }
 
 resource "azurerm_virtual_network" "vnet-3" {
   address_space       = ["172.17.8.0/22"]
-  location            = var.lab-location
+  location            = var.resource_location
   name                = "vnet-3"
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   tags                = var.tags
 }
 
 resource "azurerm_virtual_network" "vnet-4" {
   address_space       = ["172.17.252.0/22"]
-  location            = var.lab-location
+  location            = var.resource_location
   name                = "vnet-4"
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   tags                = var.tags
 }
 
@@ -54,42 +62,42 @@ resource "azurerm_virtual_network" "vnet-4" {
 # requires proper networking, not just VNets
 resource "azurerm_subnet" "vnet-1-subnet-1" {
   name                 = "vnet-1-subnet-1"
-  resource_group_name  = var.lab-rg
+  resource_group_name  = "${var.app_name}-RG"
   virtual_network_name = azurerm_virtual_network.vnet-1.name
   address_prefixes     = ["172.17.0.0/24"]
 }
 
 resource "azurerm_subnet" "vnet-1-subnet-2" {
   name                 = "vnet-1-subnet-2"
-  resource_group_name  = var.lab-rg
+  resource_group_name  = "${var.app_name}-RG"
   virtual_network_name = azurerm_virtual_network.vnet-1.name
   address_prefixes     = ["172.17.1.0/24"]
 }
 
 resource "azurerm_subnet" "vnet-2-subnet-1" {
   name                 = "vnet-2-subnet-1"
-  resource_group_name  = var.lab-rg
+  resource_group_name  = "${var.app_name}-RG"
   virtual_network_name = azurerm_virtual_network.vnet-2.name
   address_prefixes     = ["172.17.4.0/24"]
 }
 
 resource "azurerm_subnet" "vnet-2-subnet-2" {
   name                 = "vnet-2-subnet-2"
-  resource_group_name  = var.lab-rg
+  resource_group_name  = "${var.app_name}-RG"
   virtual_network_name = azurerm_virtual_network.vnet-2.name
   address_prefixes     = ["172.17.5.0/24"]
 }
 
 resource "azurerm_subnet" "vnet-3-subnet-1" {
   name                 = "vnet-3-subnet-1"
-  resource_group_name  = var.lab-rg
+  resource_group_name  = "${var.app_name}-RG"
   virtual_network_name = azurerm_virtual_network.vnet-3.name
   address_prefixes     = ["172.17.8.0/24"]
 }
 
 resource "azurerm_subnet" "vnet-4-subnet-1" {
   name                 = "vnet-4-subnet-1"
-  resource_group_name  = var.lab-rg
+  resource_group_name  = "${var.app_name}-RG"
   virtual_network_name = azurerm_virtual_network.vnet-4.name
   address_prefixes     = ["172.17.252.0/24"]
 }
@@ -98,14 +106,14 @@ resource "azurerm_subnet" "vnet-4-subnet-1" {
 resource "azurerm_virtual_network_peering" "peer-vnet-3-to-vnet-4" {
   name = "peer-vnet-3-to-vnet-4"
   remote_virtual_network_id = azurerm_virtual_network.vnet-4.id
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   virtual_network_name = azurerm_virtual_network.vnet-3.name
 }
 
 resource "azurerm_virtual_network_peering" "peer-vnet-4-to-vnet-3" {
   name = "peer-vnet-4-to-vnet-3"
   remote_virtual_network_id = azurerm_virtual_network.vnet-3.id
-  resource_group_name = var.lab-rg
+  resource_group_name = "${var.app_name}-RG"
   virtual_network_name = azurerm_virtual_network.vnet-4.name
 }
 

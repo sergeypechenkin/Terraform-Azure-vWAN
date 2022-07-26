@@ -1,8 +1,3 @@
-variable "lab-rg" {
-  description = "Resource Group for this lab"
-  type        = string
-  default     = "vwanrg"
-}
 
 variable "lab-location" {
   description = "Resource location"
@@ -17,4 +12,17 @@ variable "tags" {
     environment = "vwan-demo"
     deployment  = "terraform"
   }
+}
+
+variable "app_name" {
+  default = "MyDefaultApp"
+}
+
+variable "resource_group_name" {
+  default = "MyDefaultRG-RG"
+}
+
+variable "resource_location" {
+default = "northeurope"
+
 }
